@@ -1,0 +1,338 @@
+
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SITTA UT | Stok Bahan Ajar</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="top">
+        <div class="top-inner">
+            <div class="brand">
+                SITTA <span style="color: #f9c64b">UT</span>
+                <small>Sistem Informasi Tiras dan Transaksi Bahan Ajar</small>
+            </div>
+            <nav class="nav">
+                <a href="index.html">Dashboard</a>
+                <a class="active" href="stok.html">Stok Bahan Ajar</a>
+                <a href="tracking.html">Tracking DO</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="layout" id="app">
+        <h1>Stok Bahan Ajar</h1>
+        <p class="muted sub">
+            Manajemen persediaan bahan ajar seluruh UT Daerah
+        </p>
+
+        <div class="stats">
+            <div class="stat">
+                <span>Jumlah Jenis Bahan Ajar</span>
+                <strong>{{ stok.length }}</strong>
+            </div>
+
+            <div class="stat">
+                <span>Total Unit Stok</span>
+                <strong class="blue">{{ totalUnit }}</strong>
+            </div>
+
+            <div class="stat">
+                <span>Stok Menipis</span>
+                <strong class="orange">{{ jumlahMenipis }}</strong>
+            </div>
+
+            <div class="stat">
+                <span>Stok Kosong</span>
+                <strong class="red">{{ jumlahKosong }}</strong>
+            </div>
+        </div>
+
+        <section class="panel">
+            <h2>Filter &amp; Urutkan Data</h2>
+
+            <div class="form-grid">
+                <div class="field">
+                    <label>UT Daerah</label>
+                    <select v-model="filterUpbjj">
+                        <option value="">Semua UT Daerah</option>
+                        <option
+                            v-for="daerah in upbjjList"
+                            :key="daerah"
+                            :value="daerah"
+                        >
+                            {{ daerah }}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="field" v-if="filterUpbjj">
+                    <label>Kategori Mata Kuliah</label>
+                    <select v-model="filterKategori">
+                        <option value="">Semua Kategori</option>
+                        <option
+                            v-for="kategori in kategoriTersedia"
+                            :key="kategori"
+                        >
+                            {{ kategori }}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Urutkan</label>
+                    <select v-model="sortBy">
+                        <option value="judul">Judul A–Z</option>
+                        <option value="qty-asc">Stok terendah</option>
+                        <option value="qty-desc">Stok tertinggi</option>
+                        <option value="harga-asc">Harga termurah</option>
+                        <option value="harga-desc">Harga termahal</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Nama/kode bahan ajar</label>
+                    <input
+                        v-model.trim="pencarian"
+                        placeholder="Ketik judul atau kode..."
+                    >
+                </div>
+
+                <div class="field">
+                    <label>Stok perlu perhatian</label>
+                    <div class="check">
+                        <input
+                            id="low"
+                            type="checkbox"
+                            v-model="hanyaRendah"
+                        >
+                        <label for="low">
+                            Tampilkan stok di bawah batas safety
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button
+                    class="btn secondary"
+                    @click="resetFilter"
+                >
+                    Reset Filter
+                </button>
+
+                <span class="muted">
+                    {{ hasilFilter.length }} data ditemukan
+                </span>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="section-top">
+                <h2>Pengelolaan Bahan Ajar</h2>
+
+                <button class="btn" @click="mulaiTambah">
+                    + Tambah Bahan Ajar
+                </button>
+            </div>
+
+            <div
+                v-if="pesan"
+                :class="['notice', { error: pesanError }]"
+                v-text="pesan"
+            ></div>
+
+            <ba-stock-table
+                :items="hasilFilter"
+                @edit="mulaiEdit"
+                @hapus="konfirmasiHapus"
+            ></ba-stock-table>
+        </section>
+
+        <section
+            class="panel"
+            id="form-stok"
+            v-show="formTerbuka"
+        >
+            <h2>
+                {{ modeEdit ? 'Edit Stok Bahan Ajar' : 'Tambah Bahan Ajar Baru' }}
+            </h2>
+
+            <p class="muted">
+                Semua kolom wajib diisi. Harga, stok, dan safety tidak boleh negatif.
+            </p>
+
+            <form @submit.prevent="simpan" @keydown.enter.prevent="simpan">
+                <div class="form-grid">
+                    <div class="field">
+                        <label>Kode Mata Kuliah *</label>
+                        <input
+                            required
+                            maxlength="20"
+                            v-model.trim="form.kode"
+                            placeholder="STSI4209"
+                        >
+                    </div>
+
+                    <div class="field">
+                        <label>Judul Mata Kuliah *</label>
+                        <input
+                            required
+                            v-model.trim="form.judul"
+                            placeholder="Judul bahan ajar"
+                        >
+                    </div>
+
+                    <div class="field">
+                        <label>Kategori *</label>
+                        <select required v-model="form.kategori">
+                            <option value="">Pilih kategori</option>
+                            <option
+                                v-for="k in kategoriList"
+                                :key="k"
+                            >
+                                {{ k }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>UT Daerah *</label>
+                        <select required v-model="form.upbjj">
+                            <option value="">Pilih UT Daerah</option>
+                            <option
+                                v-for="u in upbjjList"
+                                :key="u"
+                            >
+                                {{ u }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>Lokasi Rak *</label>
+                        <input
+                            required
+                            v-model.trim="form.lokasiRak"
+                            placeholder="A-01"
+                        >
+                    </div>
+
+                    <div class="field">
+                        <label>Harga (Rp) *</label>
+                        <input
+                            required
+                            type="number"
+                            min="0"
+                            v-model.number="form.harga"
+                        >
+                    </div>
+
+                    <div class="field">
+                        <label>Jumlah Stok *</label>
+                        <input
+                            required
+                            type="number"
+                            min="0"
+                            v-model.number="form.qty"
+                        >
+                    </div>
+
+                    <div class="field">
+                        <label>Safety Stock *</label>
+                        <input
+                            required
+                            type="number"
+                            min="0"
+                            v-model.number="form.safety"
+                        >
+                    </div>
+
+                    <div class="field">
+                        <label>Catatan *</label>
+                        <input
+                            required
+                            v-model.trim="form.catatanHTML"
+                            placeholder="Catatan singkat"
+                        >
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button class="btn" type="submit">
+                        {{ modeEdit ? 'Simpan Perubahan' : 'Tambahkan Data' }}
+                    </button>
+
+                    <button
+                        class="btn secondary"
+                        type="button"
+                        @click="formTerbuka = false"
+                    >
+                        Batal
+                    </button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <footer class="footer">
+        STSI4209 · Tugas Praktik 3
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script>
+    <script src="js/dataBahanAjar.js"></script>
+    <script src="js/services/api.js"></script>
+
+    <script>
+        Promise.all([
+            fetch('templates/status-badge.html'),
+            fetch('templates/stock-table.html')
+        ])
+        .then(async responses => {
+            for (const response of responses) {
+                if (!response.ok) {
+                    throw new Error('Gagal memuat template Vue');
+                }
+            }
+
+            return Promise.all(
+                responses.map(response => response.text())
+            );
+        })
+        .then(templates => {
+            templates.forEach(html => {
+                document.body.insertAdjacentHTML('beforeend', html);
+            });
+
+            const scripts = [
+                'js/components/status-badge.js',
+                'js/components/stock-table.js',
+                'js/stok-app.js'
+            ];
+
+            function loadScript(index) {
+                if (index >= scripts.length) {
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = scripts[index];
+
+                script.onload = () => loadScript(index + 1);
+                script.onerror = () => {
+                    console.error('Gagal memuat:', scripts[index]);
+                };
+
+                document.body.appendChild(script);
+            }
+
+            loadScript(0);
+        })
+        .catch(error => {
+            console.error(error);
+        });
+    </script>
+</body>
+</html>

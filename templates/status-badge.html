@@ -1,0 +1,13 @@
+
+<script type="text/x-template" id="tpl-status-badge">
+    <span
+        class="status-badge"
+        :class="statusClass"
+        :title="statusDescription"
+    >
+        <span v-if="status === 'Kosong'">●</span>
+        <span v-else-if="status === 'Menipis'">▲</span>
+        <span v-else>✓</span>
+        {{ status }}
+    </span>
+</script>

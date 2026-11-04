@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="id">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>SITTA UT | Tracking DO</title>
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+    <body>
+        <header class="top">
+            <div class="top-inner">
+                <div class="brand">
+                    SITTA <span style="color: #f9c64b">UT</span>
+                    <small>Sistem Informasi Tiras dan Transaksi Bahan Ajar</small>
+                </div>
+                <nav class="nav">
+                    <a href="index.html">Dashboard</a>
+                    <a href="stok.html">Stok Bahan Ajar</a>
+                    <a class="active" href="tracking.html">Tracking DO</a>
+                </nav>
+            </div>
+        </header>
+
+        <main id="app" class="layout">
+            <h1>Tracking Delivery Order</h1>
+            <p class="muted sub">
+                Pencarian dan pencatatan pengiriman paket bahan ajar mahasiswa
+            </p>
+
+            <section class="panel">
+                <h2>Cari Pengiriman</h2>
+                <div class="form-grid">
+                    <div class="field">
+                        <label>Nomor DO atau NIM</label>
+                        <input
+                            v-model.trim="pencarian"
+                            placeholder="Contoh: DO2026-001 / 043210001"
+                        >
+                    </div>
+                </div>
+                <div class="actions">
+                    <button class="btn secondary" @click="pencarian=''">
+                        Reset Pencarian
+                    </button>
+                    <span class="muted">
+                        {{ hasilTracking.length }} pesanan ditemukan
+                    </span>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="section-top">
+                    <h2>Daftar Delivery Order</h2>
+                    <button class="btn" @click="formTerbuka=!formTerbuka">
+                        + Tambah Delivery Order
+                    </button>
+                </div>
+                <div
+                    v-if="pesan"
+                    :class="['notice', { error: pesanError }]"
+                    v-text="pesan"
+                ></div>
+                <div class="tablewrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>No. DO</th>
+                                <th>NIM</th>
+                                <th>Nama</th>
+                                <th>Ekspedisi</th>
+                                <th>Paket</th>
+                                <th>Tanggal Kirim</th>
+                                <th>Total Harga</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                v-for="doItem in hasilTracking"
+                                :key="doItem.nomorDO"
+                            >
+                                <td><strong>{{ doItem.nomorDO }}</strong></td>
+                                <td>{{ doItem.nim }}</td>
+                                <td>{{ doItem.nama }}</td>
+                                <td>{{ doItem.ekspedisi }}</td>
+                                <td>{{ namaPaket(doItem.kodePaket) }}</td>
+                                <td>{{ tanggalIndo(doItem.tanggalKirim) }}</td>
+                                <td>{{ rupiah(doItem.totalHarga) }}</td>
+                                <td>
+                                    <span
+                                        :class="[
+                                            'badge',
+                                            { warn: doItem.status === 'Diproses' }
+                                        ]"
+                                    >
+                                        {{ doItem.status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr v-if="!hasilTracking.length">
+                                <td colspan="8" class="empty">
+                                    Data pengiriman tidak ditemukan.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="panel" v-show="formTerbuka">
+                <h2>Form Delivery Order Baru</h2>
+                <p class="muted">
+                    Nomor DO dibuat otomatis berdasarkan tahun berjalan dan nomor urut.
+                </p>
+                <form @submit.prevent="tambahDO">
+                    <div class="form-grid">
+                        <div class="field">
+                            <label>Nomor DO (Otomatis)</label>
+                            <input :value="nomorDOBerikutnya" disabled>
+                        </div>
+                        <div class="field">
+                            <label>NIM *</label>
+                            <input
+                                required
+                                v-model.trim="form.nim"
+                                maxlength="20"
+                                placeholder="NIM mahasiswa"
+                            >
+                        </div>
+                        <div class="field">
+                            <label>Nama Mahasiswa *</label>
+                            <input
+                                required
+                                v-model.trim="form.nama"
+                                placeholder="Nama lengkap"
+                            >
+                        </div>
+                        <div class="field">
+                            <label>Ekspedisi *</label>
+                            <select required v-model="form.ekspedisi">
+                                <option value="">Pilih ekspedisi</option>
+                                <option v-for="j in ekspedisiList" :key="j">
+                                    {{ j }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Paket Bahan Ajar *</label>
+                            <select required v-model="form.kodePaket">
+                                <option value="">Pilih paket</option>
+                                <option
+                                    v-for="p in paket"
+                                    :key="p.kode"
+                                    :value="p.kode"
+                                >
+                                    {{ p.kode }} — {{ p.nama }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Tanggal Kirim *</label>
+                            <input
+                                type="date"
+                                required
+                                v-model="form.tanggalKirim"
+                            >
+                        </div>
+                        <div class="field">
+                            <label>Total Harga</label>
+                            <input :value="rupiah(totalHargaPaket)" disabled>
+                        </div>
+                    </div>
+
+                    <div class="detail" v-if="paketTerpilih">
+                        <strong>Detail Paket: {{ paketTerpilih.nama }}</strong>
+                        <p>Isi paket:</p>
+                        <ul>
+                            <li v-for="isi in paketTerpilih.isi" :key="isi">
+                                {{ isi }}
+                            </li>
+                        </ul>
+                        <strong>Harga: {{ rupiah(paketTerpilih.harga) }}</strong>
+                    </div>
+
+                    <div class="actions">
+                        <button class="btn" type="submit">
+                            Simpan Delivery Order
+                        </button>
+                        <button
+                            class="btn secondary"
+                            type="button"
+                            @click="formTerbuka=false"
+                        >
+                            Batal
+                        </button>
+                    </div>
+                </form>
+            </section>
+        </main>
+
+        <footer class="footer">STSI4209 · Tugas Praktik 2</footer>
+
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.min.js"></script>
+        <script src="js/dataBahanAjar.js"></script>
+        <script src="js/tracking-app.js"></script>
+    </body>
+</html>

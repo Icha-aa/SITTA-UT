@@ -1,0 +1,161 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | SITTA UT</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="dashboard-page">
+
+    <header class="top">
+        <div class="top-inner">
+            <a href="index.html" class="brand">
+                <div class="brand-logo">
+                    <i data-lucide="graduation-cap"></i>
+                </div>
+
+                <div class="brand-text">
+                    <div class="brand-title">
+                        SITTA <span>UT</span>
+                    </div>
+                    <small>Sistem Informasi Bahan Ajar</small>
+                </div>
+            </a>
+
+            <nav class="nav">
+                <a href="index.html" class="active">
+                    <i data-lucide="layout-dashboard"></i>
+                    Dashboard
+                </a>
+
+                <a href="stok.html">
+                    <i data-lucide="book-open"></i>
+                    Stok Bahan Ajar
+                </a>
+
+                <a href="tracking.html">
+                    <i data-lucide="truck"></i>
+                    Tracking DO
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="dashboard-container">
+
+        <section class="welcome-section">
+            <div class="welcome-content">
+                <div class="welcome-badge">
+                    <span class="badge-dot"></span>
+                    Sistem Informasi Akademik
+                </div>
+
+                <h1>Selamat Datang di <span>SITTA UT</span></h1>
+
+                <p>
+                    Kelola persediaan bahan ajar dan pantau proses
+                    pengiriman dengan lebih mudah, cepat, dan efisien
+                    melalui satu sistem terintegrasi.
+                </p>
+            </div>
+
+            <div class="welcome-icon">
+                <i data-lucide="layers-3"></i>
+            </div>
+        </section>
+
+        <section class="menu-section">
+            <div class="section-heading">
+                <div>
+                    <span class="section-label">MENU UTAMA</span>
+                    <h2>Kelola Layanan</h2>
+                    <p>
+                        Pilih layanan yang ingin kamu akses.
+                    </p>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+
+                <a href="stok.html" class="dashboard-card">
+                    <div class="card-top">
+                        <div class="card-icon stock-icon">
+                            <i data-lucide="book-open-check"></i>
+                        </div>
+
+                        <span class="card-tag">
+                            Persediaan
+                        </span>
+                    </div>
+
+                    <div class="card-body">
+                        <h3>Stok Bahan Ajar</h3>
+                        <p>
+                            Pantau ketersediaan bahan ajar,
+                            kelola data persediaan, dan periksa
+                            kebutuhan stok di seluruh UT Daerah.
+                        </p>
+                    </div>
+
+                    <div class="card-bottom">
+                        <span>Buka Halaman Stok</span>
+                        <div class="arrow-icon">
+                            <i data-lucide="arrow-up-right"></i>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="tracking.html" class="dashboard-card">
+                    <div class="card-top">
+                        <div class="card-icon tracking-icon">
+                            <i data-lucide="package-check"></i>
+                        </div>
+
+                        <span class="card-tag">
+                            Pengiriman
+                        </span>
+                    </div>
+
+                    <div class="card-body">
+                        <h3>Tracking Delivery Order</h3>
+                        <p>
+                            Lacak status pengiriman bahan ajar,
+                            cari pesanan berdasarkan NIM atau nomor DO,
+                            dan kelola data pengiriman.
+                        </p>
+                    </div>
+
+                    <div class="card-bottom">
+                        <span>Buka Halaman Tracking</span>
+                        <div class="arrow-icon">
+                            <i data-lucide="arrow-up-right"></i>
+                        </div>
+                    </div>
+                </a>
+
+            </div>
+        </section>
+
+        
+
+    </main>
+
+    <footer class="dashboard-footer">
+        <span>© 2026 SITTA UT</span>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
